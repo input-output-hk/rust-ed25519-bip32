@@ -1,0 +1,25 @@
+[Custom]
+typedef u32 DerivationIndex;
+
+[Error]
+enum DerivationError {
+    "InvalidAddition",
+    "ExpectedSoftDerivation"
+};
+
+enum DerivationScheme {
+    "V2"
+};
+
+interface XPubWrapper {
+    [Throws=DerivationError]
+    XPubWrapper derive(DerivationScheme scheme, DerivationIndex index);
+};
+
+interface XPrvWrapper {
+    XPubWrapper public();
+    [Throws=DerivationError]
+    XPrvWrapper derive(DerivationScheme scheme, DerivationIndex index);
+};
+
+namespace ed25519_bip32 {};

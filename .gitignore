@@ -1,2 +1,7 @@
 Cargo.lock
 target/
+**/.DS_Store
+local.properties
+.gradle
+.idea
+.idea/*
