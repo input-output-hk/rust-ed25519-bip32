@@ -28,10 +28,8 @@ mod tests;
 #[cfg(test)]
 #[cfg(feature = "with-bench")]
 mod bench;
-mod wrapper;
 
 pub use derivation::{DerivationError, DerivationIndex, DerivationScheme};
 pub use key::{PrivateKeyError, PublicKeyError, XPrv, XPub, XPRV_SIZE, XPUB_SIZE};
 pub use signature::{Signature, SignatureError, SIGNATURE_SIZE};
 
-uniffi::include_scaffolding!("ed25519-bip32");

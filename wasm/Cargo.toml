@@ -1,5 +1,5 @@
 [package]
-name = "ed25519-bip32"
+name = "ed25519-bip32-wasm"
 version = "0.4.1"
 authors = ["Vincent Hanquez <vincent.hanquez@iohk.io>", "Nicolas Di Prima <nicolas.diprima@iohk.io>", "Ahmed Moussa <ahmed.moussa@iohk.io>"]
 license = "MIT OR Apache-2.0"
@@ -11,16 +11,16 @@ description = "Ed25519 BIP32"
 categories = [ "cryptography" ]
 
 [dependencies]
-cryptoxide = "0.4"
-uniffi = { version = "0.27.0", features = [ "build", "cli" ]}
-wasm-bindgen = { version = "0.2.84", optional = true }
-
+ed25519-bip32 = "0.4"
+wasm-bindgen = { version = "0.2.84" }
+wasm-bindgen-futures = '0.4'
 
 [lib]
 crate-type = ["staticlib", "lib", "cdylib"]
-path = "src/lib.rs"
+path = "./src/lib.rs"
 
 [features]
 default = []
 with-bench = []
+with-wasm = []
 

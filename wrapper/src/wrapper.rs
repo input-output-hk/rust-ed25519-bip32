@@ -1,6 +1,6 @@
-use crate::{
+use std::sync::Arc;
+use ed25519_bip32::{
     DerivationError,
-    DerivationIndex,
     DerivationScheme,
     XPrv,
     XPRV_SIZE,
@@ -18,6 +18,7 @@ pub struct XPubWrapper {
     pub key: [u8; XPUB_SIZE],
 }
 
+
 impl From<XPubWrapper> for XPub {
     /// Converts an `XPubWrapper` instance into an `XPub` instance
     ///
@@ -34,6 +35,7 @@ impl From<XPubWrapper> for XPub {
 }
 
 impl From<XPub> for XPubWrapper {
+
     /// Converts an `XPub` value into an `XPubWrapper`, applying length checks.
     ///
     /// # Arguments
@@ -62,7 +64,6 @@ impl From<XPub> for XPubWrapper {
         }
     }
 }
-
 impl XPubWrapper {
     /// Creates a new `XPubWrapper` by providing an array of bytes.
     ///
@@ -85,11 +86,11 @@ impl XPubWrapper {
     /// # Returns
     ///
     /// * `Result<Self, DerivationError>` - The derived object on success, or an error on failure.
-    pub fn derive(&self, scheme: DerivationScheme, index: DerivationIndex) -> Result<Self, DerivationError> {
+    pub fn derive(&self, scheme: DerivationScheme, index: u32) -> Result<Arc<Self>, DerivationError> {
         let x_pub: XPub = (*self).into();
         let result = x_pub.derive(scheme, index);
         return if result.is_ok() {
-            Ok(result.unwrap().into())
+            Ok(Arc::new(result.unwrap().into()))
         } else {
             Err(result.err().unwrap())
         }
@@ -117,7 +118,7 @@ impl From<XPrvWrapper> for XPrv {
     ///
     /// * `Self` - This function returns an instance of `XPrv`.
     fn from(wrapper: XPrvWrapper) -> Self {
-        XPrv::from_bytes(wrapper.key)
+        XPrv::from_bytes_verified(wrapper.key).unwrap()
     }
 }
 
@@ -150,9 +151,9 @@ impl From<XPrv> for XPrvWrapper {
 
 impl XPrvWrapper {
     /// Get the associated `XPubWrapper`
-    pub fn public(&self) -> XPubWrapper {
+    pub fn public(&self) -> Arc<XPubWrapper> {
         let x_prv: XPrv = (*self).into();
-        return x_prv.public().into();
+        return Arc::new(x_prv.public().into());
     }
 
     /// Derives a new private key from an existing one according to the specified derivation scheme and index.
@@ -167,8 +168,8 @@ impl XPrvWrapper {
     ///
     /// * `Result<Self, DerivationError>` - Returns a new instance of the private key if the derivation is successful.
     /// If the derivation fails, it returns a `DerivationError`.
-    pub fn derive(&self, scheme: DerivationScheme, index: DerivationIndex) -> Result<Self, DerivationError> {
+    pub fn derive(&self, scheme: DerivationScheme, index: u32) -> Result<Arc<Self>, DerivationError> {
         let x_prv: XPrv = (*self).into();
-        return Ok(x_prv.derive(scheme, index).into());
+        return Ok(Arc::new(x_prv.derive(scheme, index).into()));
     }
 }

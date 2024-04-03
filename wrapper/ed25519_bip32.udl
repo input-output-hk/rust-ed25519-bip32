@@ -1,5 +1,3 @@
-[Custom]
-typedef u32 DerivationIndex;
 
 [Error]
 enum DerivationError {
@@ -13,13 +11,13 @@ enum DerivationScheme {
 
 interface XPubWrapper {
     [Throws=DerivationError]
-    XPubWrapper derive(DerivationScheme scheme, DerivationIndex index);
+    XPubWrapper derive(DerivationScheme scheme, u32 index);
 };
 
 interface XPrvWrapper {
     XPubWrapper public();
     [Throws=DerivationError]
-    XPrvWrapper derive(DerivationScheme scheme, DerivationIndex index);
+    XPrvWrapper derive(DerivationScheme scheme, u32 index);
 };
 
 namespace ed25519_bip32 {};
