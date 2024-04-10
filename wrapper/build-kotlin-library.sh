@@ -5,7 +5,7 @@ set -eo pipefail
 pushd `dirname $0`
 trap popd EXIT
 
-NAME="ed25519_bip32_uniffi"
+NAME="ed25519_bip32_wrapper"
 BUNDLE_IDENTIFIER="org.hyperledger.$NAME"
 LIBRARY_NAME="lib$NAME.a"
 OUT_PATH="out/kmpp-uniffi"
@@ -13,11 +13,10 @@ WRAPPER_PATH="../Sources/ed25519_bip32"
 AARCH64_APPLE_DARWIN_PATH="./target/aarch64-apple-darwin/release"
 X86_64_APPLE_DARWIN_PATH="./target/x86_64-apple-darwin/release"
 
-# apple_targets=("aarch64-apple-ios" "aarch64-apple-ios-sim" "x86_64-apple-ios" "aarch64-apple-darwin" "x86_64-apple-darwin")
-apple_targets=()
+apple_targets=("aarch64-apple-ios" "aarch64-apple-ios-sim" "x86_64-apple-ios" "aarch64-apple-darwin" "x86_64-apple-darwin")
+# apple_targets=()
 
-# android_targets=("aarch64-linux-android" "armv7-linux-androideabi" "i686-linux-android" "x86_64-linux-android")
-android_targets=("x86_64-linux-android")
+android_targets=("aarch64-linux-android" "armv7-linux-androideabi" "i686-linux-android" "x86_64-linux-android")
 android_jni=("arm64-v8a" "armeabi-v7a" "x86" "x86_64")
 
 # Build for apple targets
@@ -31,15 +30,15 @@ done
 mkdir -p $OUT_PATH/macos-native/static
 mkdir -p $OUT_PATH/macos-native/dynamic
 
-# # dylib for JVM
-# lipo -create $AARCH64_APPLE_DARWIN_PATH/lib$NAME.dylib \
-#              $X86_64_APPLE_DARWIN_PATH/lib$NAME.dylib \
-#      -output $OUT_PATH/macos-native/dynamic/lib$NAME.dylib
 
-# # .a for Native
-# lipo -create $AARCH64_APPLE_DARWIN_PATH/lib$NAME.a \
-#              $X86_64_APPLE_DARWIN_PATH/lib$NAME.a \
-#      -output $OUT_PATH/macos-native/static/lib$NAME.a
+lipo -create $AARCH64_APPLE_DARWIN_PATH/lib$NAME.dylib \
+              $X86_64_APPLE_DARWIN_PATH/lib$NAME.dylib \
+      -output $OUT_PATH/macos-native/dynamic/lib$NAME.dylib
+
+
+lipo -create $AARCH64_APPLE_DARWIN_PATH/lib$NAME.a \
+              $X86_64_APPLE_DARWIN_PATH/lib$NAME.a \
+      -output $OUT_PATH/macos-native/static/lib$NAME.a
 
 cargo install cross --git https://github.com/cross-rs/cross
 
@@ -61,4 +60,4 @@ echo "Generating wrapper..."
 mkdir -p $OUT_PATH
 cargo install --bin uniffi-bindgen-kotlin-multiplatform uniffi_bindgen_kotlin_multiplatform@0.1.0
 CURRENT_ARCH=$(rustc --version --verbose | grep host | cut -f2 -d' ')
-uniffi-bindgen-kotlin-multiplatform --lib-file ./target/$CURRENT_ARCH/release/$LIBRARY_NAME --out-dir $OUT_PATH uniffi/ed25519_bip32_uniffi.udl
+uniffi-bindgen-kotlin-multiplatform --lib-file ./target/$CURRENT_ARCH/release/$LIBRARY_NAME --out-dir $OUT_PATH ./ed25519_bip32.udl
