@@ -50,23 +50,20 @@ pub struct XPrvWrapper {
  impl XPrvWrapper {
     
     #[wasm_bindgen(constructor)]
-    pub fn new(prv: Uint8Array,) -> Self {
+    pub fn new(prv: Uint8Array) -> Self {
+      // Copy bytes from the Uint8Array into the array
         let mut bytes = [0u8; XPRV_SIZE];
-        let val: Uint8Array = prv.into();
-        // Copy bytes from the Uint8Array into the array
-        val.copy_to(&mut bytes);
+        prv.copy_to(&mut bytes);
         let x_prv: XPrv = XPrv::from_slice_verified(&bytes).unwrap();
-        XPrvWrapper { prv:x_prv } // Construct and return a new instance of MyStruct
+        XPrvWrapper { prv:x_prv }
     }
-
 
     pub fn public(&self) -> Uint8Array {
         let pub_inst =  self.prv.public();
-        let pub_buff = pub_inst.public_key_bytes();
-        let buffer = ArrayBuffer::new(pub_buff.len() as u32);
-        let view = Uint8Array::new(&buffer);
-        view.copy_from(pub_buff);
-        return view;
+        let pub_bytes = pub_inst.public_key_bytes();
+        let buffer = Uint8Array::new_with_length(32);
+        buffer.copy_from(pub_bytes);
+        return buffer;
     }
 
     pub fn derive(&self, index: u32) -> Uint8Array {
