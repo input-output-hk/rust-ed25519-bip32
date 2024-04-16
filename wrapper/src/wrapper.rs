@@ -3,8 +3,10 @@ use ed25519_bip32::{
     DerivationError,
     DerivationScheme,
     XPrv,
-    XPRV_SIZE,
     XPub,
+    CHAIN_CODE_SIZE,
+    EXTENDED_SECRET_KEY_SIZE,
+    XPRV_SIZE,
     XPUB_SIZE
 };
 
@@ -168,8 +170,28 @@ impl XPrvWrapper {
     ///
     /// * `Result<Self, DerivationError>` - Returns a new instance of the private key if the derivation is successful.
     /// If the derivation fails, it returns a `DerivationError`.
-    pub fn derive(&self, scheme: DerivationScheme, index: u32) -> Result<Arc<Self>, DerivationError> {
-        let x_prv: XPrv = (*self).into();
-        return Ok(Arc::new(x_prv.derive(scheme, index).into()));
+    pub fn derive(&self, index: u32) -> Result<Arc<Self>, DerivationError> {
+      let x_prv: XPrv = (*self).into();
+      let derived = x_prv.derive(DerivationScheme::V2, index);
+
+      return Ok(Arc::new(derived.into()));
+    }
+
+    pub fn extended_secret_key(&self) -> &[u8; EXTENDED_SECRET_KEY_SIZE] {
+      let x_prv: XPrv = (*self).into();
+      return &x_prv.extended_secret_key();
+    }
+
+    pub fn chain_code(&self) -> &[u8; CHAIN_CODE_SIZE] {
+      let x_prv: XPrv = (*self).into();
+      return x_prv.chain_code();
+    }
+
+    pub fn from_nonextended_noforce(
+      bytes: &[u8; 32],
+      chain_code: &[u8; CHAIN_CODE_SIZE],
+    ) -> Result<Self, ()> {
+      let x_prv = XPrv::from_nonextended_noforce(bytes, chain_code).unwrap();
+      return Ok(x_prv.into());
     }
 }
