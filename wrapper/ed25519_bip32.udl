@@ -11,13 +11,13 @@ enum DerivationScheme {
 
 interface XPubWrapper {
     [Throws=DerivationError]
-    XPubWrapper derive(DerivationScheme scheme, u32 index);
+    XPubWrapper derive(u32 index);
 };
 
 interface XPrvWrapper {
     XPubWrapper public();
     [Throws=DerivationError]
-    XPrvWrapper derive(DerivationScheme scheme, u32 index);
+    XPrvWrapper derive(u32 index);
 };
 
 namespace ed25519_bip32 {};

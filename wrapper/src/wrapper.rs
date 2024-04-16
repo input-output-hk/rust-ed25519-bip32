@@ -88,9 +88,9 @@ impl XPubWrapper {
     /// # Returns
     ///
     /// * `Result<Self, DerivationError>` - The derived object on success, or an error on failure.
-    pub fn derive(&self, scheme: DerivationScheme, index: u32) -> Result<Arc<Self>, DerivationError> {
+    pub fn derive(&self, index: u32) -> Result<Arc<Self>, DerivationError> {
         let x_pub: XPub = (*self).into();
-        let result = x_pub.derive(scheme, index);
+        let result = x_pub.derive(DerivationScheme::V2, index);
         return if result.is_ok() {
             Ok(Arc::new(result.unwrap().into()))
         } else {
@@ -173,18 +173,17 @@ impl XPrvWrapper {
     pub fn derive(&self, index: u32) -> Result<Arc<Self>, DerivationError> {
       let x_prv: XPrv = (*self).into();
       let derived = x_prv.derive(DerivationScheme::V2, index);
-
       return Ok(Arc::new(derived.into()));
     }
 
-    pub fn extended_secret_key(&self) -> &[u8; EXTENDED_SECRET_KEY_SIZE] {
+    pub fn extended_secret_key(&self) -> [u8; EXTENDED_SECRET_KEY_SIZE] {
       let x_prv: XPrv = (*self).into();
-      return &x_prv.extended_secret_key();
+      return x_prv.extended_secret_key().clone();
     }
 
-    pub fn chain_code(&self) -> &[u8; CHAIN_CODE_SIZE] {
+    pub fn chain_code(&self) -> [u8; CHAIN_CODE_SIZE] {
       let x_prv: XPrv = (*self).into();
-      return x_prv.chain_code();
+      return x_prv.chain_code().clone();
     }
 
     pub fn from_nonextended_noforce(
