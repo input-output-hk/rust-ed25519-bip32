@@ -18,6 +18,15 @@ interface XPrvWrapper {
     XPubWrapper public();
     [Throws=DerivationError]
     XPrvWrapper derive(u32 index);
+
+    [Name=from_nonextended_noforce]
+    constructor(bytes byte_array, bytes chain_code);
+
+    [Name=from_bytes]
+    constructor(bytes byte_array);
+
+    bytes chain_code();
+    bytes extended_secret_key();
 };
 
 namespace ed25519_bip32 {};

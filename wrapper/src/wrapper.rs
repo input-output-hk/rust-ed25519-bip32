@@ -5,7 +5,6 @@ use ed25519_bip32::{
     XPrv,
     XPub,
     CHAIN_CODE_SIZE,
-    EXTENDED_SECRET_KEY_SIZE,
     XPRV_SIZE,
     XPUB_SIZE
 };
@@ -176,21 +175,32 @@ impl XPrvWrapper {
       return Ok(Arc::new(derived.into()));
     }
 
-    pub fn extended_secret_key(&self) -> [u8; EXTENDED_SECRET_KEY_SIZE] {
+    pub fn extended_secret_key(&self) -> Vec<u8> {
       let x_prv: XPrv = (*self).into();
-      return x_prv.extended_secret_key().clone();
+      return x_prv.extended_secret_key().clone().to_vec();
     }
 
-    pub fn chain_code(&self) -> [u8; CHAIN_CODE_SIZE] {
+    pub fn chain_code(&self) -> Vec<u8> {
       let x_prv: XPrv = (*self).into();
-      return x_prv.chain_code().clone();
+      return x_prv.chain_code().clone().to_vec();
     }
 
     pub fn from_nonextended_noforce(
-      bytes: &[u8; 32],
-      chain_code: &[u8; CHAIN_CODE_SIZE],
-    ) -> Result<Self, ()> {
-      let x_prv = XPrv::from_nonextended_noforce(bytes, chain_code).unwrap();
-      return Ok(x_prv.into());
+      byte_array: Vec<u8>,
+      chain_code: Vec<u8>,
+    ) -> Self {
+        let byte_array_ref: &[u8; 32] = unsafe { &*(byte_array.as_slice() as *const [u8] as *const [u8; 32]) };
+        let chain_code_ref: &[u8; CHAIN_CODE_SIZE] = unsafe { &*(chain_code.as_slice() as *const [u8] as *const [u8; CHAIN_CODE_SIZE]) };
+        let x_prv = XPrv::from_nonextended_noforce(byte_array_ref, chain_code_ref).unwrap();
+      return x_prv.into()
     }
+
+    pub fn from_bytes(
+        byte_array: Vec<u8>,
+    ) -> Self {
+        let byte_array_ref: &[u8; 32] = unsafe { &*(byte_array.as_slice() as *const [u8] as *const [u8; 32]) };
+        let x_prv = XPrv::from_slice_verified(byte_array_ref).unwrap();
+        return x_prv.into()
+    }
+
 }
