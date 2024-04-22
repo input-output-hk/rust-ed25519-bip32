@@ -8,7 +8,7 @@ trap popd EXIT
 NAME="ed25519_bip32_wrapper"
 BUNDLE_IDENTIFIER="org.hyperledger.$NAME"
 LIBRARY_NAME="lib$NAME.a"
-OUT_PATH="out/kmpp-uniffi"
+OUT_PATH="build"
 WRAPPER_PATH="../Sources/ed25519_bip32"
 AARCH64_APPLE_DARWIN_PATH="./target/aarch64-apple-darwin/release"
 X86_64_APPLE_DARWIN_PATH="./target/x86_64-apple-darwin/release"

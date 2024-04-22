@@ -44,9 +44,9 @@ pub struct XPrvWrapper {
       return self.bytes_to_buffer(pub_inst.public_key_bytes(), 32);
     }
 
-    pub fn derive(&self, index: u32) -> Uint8Array {
+    pub fn derive(&self, index: u32) -> Self {
       let derived = self.prv.derive(DerivationScheme::V2, index);
-      return self.get_extended_secret_key(&derived);
+      XPrvWrapper { prv: derived }
     }
 
     pub fn extended_secret_key(&self) -> Uint8Array {
@@ -82,5 +82,18 @@ pub struct XPrvWrapper {
 
       let x_prv = XPrv::from_nonextended_noforce(&bytes, &chain_code).unwrap();
       XPrvWrapper { prv: x_prv }
+    }
+
+    pub fn from_extended_and_chaincode(
+      js_bytes: Uint8Array,
+      js_chain_code: Uint8Array,
+    ) -> Self {
+      let mut bytes = [0u8; EXTENDED_SECRET_KEY_SIZE];
+      let mut chain_code = [0u8; CHAIN_CODE_SIZE];
+      js_bytes.copy_to(&mut bytes);
+      js_chain_code.copy_to(&mut chain_code);
+
+      let x_prv = XPrv::from_extended_and_chaincode(&bytes, &chain_code);
+      XPrvWrapper{ prv: x_prv }
     }
 }

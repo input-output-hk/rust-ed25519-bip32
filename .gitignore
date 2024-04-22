@@ -1,4 +1,7 @@
 Cargo.lock
+build/
+node_modules/
+pkg*/
 target/
 **/.DS_Store
 local.properties
