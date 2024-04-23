@@ -16,7 +16,7 @@ X86_64_APPLE_DARWIN_PATH="./target/x86_64-apple-darwin/release"
 apple_targets=("aarch64-apple-ios" "aarch64-apple-ios-sim" "x86_64-apple-ios" "aarch64-apple-darwin" "x86_64-apple-darwin")
 # apple_targets=()
 
-android_targets=("aarch64-linux-android" "armv7-linux-androideabi" "i686-linux-android" "x86_64-linux-android")
+android_targets=("aarch64-linux-android" "armv7-linux-androideabi" "i686-linux-android" "x86_64-linux-android" "x86_64-unknown-linux-gnu")
 android_jni=("arm64-v8a" "armeabi-v7a" "x86" "x86_64")
 
 # Build for apple targets
@@ -60,4 +60,7 @@ echo "Generating wrapper..."
 mkdir -p $OUT_PATH
 cargo install --bin uniffi-bindgen-kotlin-multiplatform uniffi_bindgen_kotlin_multiplatform@0.1.0
 CURRENT_ARCH=$(rustc --version --verbose | grep host | cut -f2 -d' ')
-uniffi-bindgen-kotlin-multiplatform --lib-file ./target/$CURRENT_ARCH/release/$LIBRARY_NAME --out-dir $OUT_PATH ./ed25519_bip32.udl
+
+uniffi-bindgen-kotlin-multiplatform --lib-file ./target/$CURRENT_ARCH/release/$LIBRARY_NAME --out-dir $OUT_PATH/generated ./ed25519_bip32.udl
+
+echo "Completed"
