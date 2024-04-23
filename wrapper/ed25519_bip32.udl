@@ -22,8 +22,8 @@ interface XPrvWrapper {
     [Name=from_nonextended_noforce]
     constructor(bytes byte_array, bytes chain_code);
 
-    [Name=from_bytes]
-    constructor(bytes byte_array);
+    [Name=from_extended_and_chaincode]
+    constructor(bytes byte_array, bytes chain_code);
 
     bytes chain_code();
     bytes extended_secret_key();

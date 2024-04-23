@@ -2,7 +2,7 @@
 
 set -eo pipefail
 
-wasm-pack build -t nodejs
+wasm-pack build -t web --release
 
 npm i
 npm run build

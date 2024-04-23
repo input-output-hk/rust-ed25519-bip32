@@ -3,7 +3,7 @@ const { wasm } = require('@rollup/plugin-wasm');
 module.exports = {
   input: './index.js',
   output: {
-    dir: 'build',
+    file: 'build/ed25519_bip32_wasm.js',
     format: 'cjs'
   },
   plugins: [wasm({

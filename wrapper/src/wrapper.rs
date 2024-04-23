@@ -1,12 +1,6 @@
 use std::sync::Arc;
 use ed25519_bip32::{
-    DerivationError,
-    DerivationScheme,
-    XPrv,
-    XPub,
-    CHAIN_CODE_SIZE,
-    XPRV_SIZE,
-    XPUB_SIZE
+    DerivationError, DerivationScheme, XPrv, XPub, CHAIN_CODE_SIZE, EXTENDED_SECRET_KEY_SIZE, XPRV_SIZE, XPUB_SIZE
 };
 
 /// This struct represents an XPubWrapper object.
@@ -189,18 +183,19 @@ impl XPrvWrapper {
       byte_array: Vec<u8>,
       chain_code: Vec<u8>,
     ) -> Self {
-        let byte_array_ref: &[u8; 32] = unsafe { &*(byte_array.as_slice() as *const [u8] as *const [u8; 32]) };
-        let chain_code_ref: &[u8; CHAIN_CODE_SIZE] = unsafe { &*(chain_code.as_slice() as *const [u8] as *const [u8; CHAIN_CODE_SIZE]) };
+        let byte_array_ref = unsafe { &*(byte_array.as_slice() as *const [u8] as *const [u8; 32]) };
+        let chain_code_ref = unsafe { &*(chain_code.as_slice() as *const [u8] as *const [u8; CHAIN_CODE_SIZE]) };
         let x_prv = XPrv::from_nonextended_noforce(byte_array_ref, chain_code_ref).unwrap();
-      return x_prv.into()
-    }
-
-    pub fn from_bytes(
-        byte_array: Vec<u8>,
-    ) -> Self {
-        let byte_array_ref: &[u8; 32] = unsafe { &*(byte_array.as_slice() as *const [u8] as *const [u8; 32]) };
-        let x_prv = XPrv::from_slice_verified(byte_array_ref).unwrap();
         return x_prv.into()
     }
 
+    pub fn from_extended_and_chaincode(
+      byte_array: Vec<u8>,
+      chain_code: Vec<u8>,
+    ) -> Self {
+      let byte_array_ref = unsafe { &*(byte_array.as_slice() as *const [u8] as *const [u8; EXTENDED_SECRET_KEY_SIZE]) };
+      let chain_code_ref = unsafe { &*(chain_code.as_slice() as *const [u8] as *const [u8; CHAIN_CODE_SIZE]) };
+      let x_prv = XPrv::from_extended_and_chaincode(byte_array_ref, chain_code_ref);
+      return x_prv.into()
+    }
 }
