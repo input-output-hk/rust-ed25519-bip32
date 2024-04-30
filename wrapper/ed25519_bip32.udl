@@ -1,4 +1,3 @@
-
 [Error]
 enum DerivationError {
     "InvalidAddition",
@@ -29,4 +28,4 @@ interface XPrvWrapper {
     bytes extended_secret_key();
 };
 
-namespace ed25519_bip32 {};
+namespace ed25519_bip32_wrapper {};
