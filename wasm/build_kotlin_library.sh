@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -eo pipefail
+# set -eo pipefail
 
 wasm-pack build -t web --release
 

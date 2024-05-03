@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -eo pipefail
+# set -eo pipefail
 
 pushd `dirname $0`
 trap popd EXIT
