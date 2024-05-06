@@ -12,12 +12,6 @@ categories = [ "cryptography" ]
 
 [dependencies]
 cryptoxide = "0.4"
-uniffi = { version = "0.26.1", features = [ "build", "cli" ]}
-wasm-bindgen = { version = "0.2.84", optional = true }
-
-[lib]
-crate-type = ["staticlib", "lib", "cdylib"]
-path = "src/lib.rs"
 
 [features]
 default = []

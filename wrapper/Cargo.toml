@@ -12,10 +12,10 @@ categories = [ "cryptography" ]
 
 [dependencies]
 ed25519-bip32 = { path = "../" }
-uniffi = { version = "0.27.0", features = [ "build", "cli" ]}
+uniffi = { version = "0.26.1", features = [ "build", "cli" ]}
 
 [build-dependencies]
-uniffi = { version = "0.27.0", features = [ "build", "cli" ] }
+uniffi = { version = "0.26.1", features = [ "build", "cli" ] }
 
 [[bin]]
 # This can be whatever name makes sense for your project, but the rest of this tutorial assumes uniffi-bindgen.
