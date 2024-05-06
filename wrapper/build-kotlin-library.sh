@@ -2,8 +2,8 @@
 
 # set -eo pipefail
 
-pushd `dirname $0`
-trap popd EXIT
+cd `dirname $0`
+trap "cd -" EXIT
 
 NAME="ed25519_bip32_wrapper"
 BUNDLE_IDENTIFIER="org.hyperledger.$NAME"
