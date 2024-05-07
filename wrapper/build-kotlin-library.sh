@@ -40,10 +40,10 @@ if [[ "$OS_NAME" != *"Linux"* ]]; then
   lipo -create $AARCH64_APPLE_DARWIN_PATH/lib$NAME.a \
                 $X86_64_APPLE_DARWIN_PATH/lib$NAME.a \
         -output $OUT_PATH/macos-native/static/lib$NAME.a
-  fi
+fi
 
 # Android
-android_targets=("aarch64-linux-android" "armv7-linux-androideabi" "i686-linux-android" "x86_64-linux-android" "x86_64-unknown-linux-gnu")
+android_targets=("aarch64-linux-android" "armv7-linux-androideabi" "i686-linux-android" "x86_64-linux-android")
 android_jni=("arm64-v8a" "armeabi-v7a" "x86" "x86_64")
 
 # Cross build
@@ -86,6 +86,14 @@ for key in "${!android_targets[@]}"; do
   cp ./target/${android_targets[$key]}/release/lib$NAME.so $OUT_PATH/jniLibs/${android_jni[$key]}/lib$NAME.so || echo ""
   echo "${android_targets[$key]}: ${android_jni[$key]}"
 done
+
+
+# Linux target
+# Cross build "x86_64-unknown-linux-gnu"
+cargo install cross --git https://github.com/cross-rs/cross
+echo "Building for x86_64-unknown-linux-gnu..."
+cross build --release --target x86_64-unknown-linux-gnu
+
 
 # Generate wrapper
 echo "Generating wrapper..."
