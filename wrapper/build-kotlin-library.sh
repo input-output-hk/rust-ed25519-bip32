@@ -46,7 +46,6 @@ if [[ "$OS_NAME" != *"Linux"* ]]; then
 android_targets=("aarch64-linux-android" "armv7-linux-androideabi" "i686-linux-android" "x86_64-linux-android" "x86_64-unknown-linux-gnu")
 android_jni=("arm64-v8a" "armeabi-v7a" "x86" "x86_64")
 
-
 # Cross build
 # cargo install cross --git https://github.com/cross-rs/cross
 
@@ -73,10 +72,10 @@ export STRIP="$TOOLCHAIN/bin/llvm-strip"
 # Build command
 cargo install cargo-ndk
 
+rustup target add ${android_targets[@]}
+
 # Build for android targets
 for target in "${android_targets[@]}"; do
-  echo "Adding $target [rustup target add $target]..."
-  rustup target add $target
   echo "Building for $target [cargo ndk build --release --target $target]..."
   cargo ndk build --release --target $target
 done
