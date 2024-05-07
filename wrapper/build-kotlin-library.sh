@@ -5,47 +5,80 @@
 cd `dirname $0`
 trap "cd -" EXIT
 
+OS_NAME=$(uname)
 NAME="ed25519_bip32_wrapper"
-BUNDLE_IDENTIFIER="org.hyperledger.$NAME"
+# BUNDLE_IDENTIFIER="org.hyperledger.$NAME"
 LIBRARY_NAME="lib$NAME.a"
 OUT_PATH="build"
-WRAPPER_PATH="../Sources/ed25519_bip32"
-AARCH64_APPLE_DARWIN_PATH="./target/aarch64-apple-darwin/release"
-X86_64_APPLE_DARWIN_PATH="./target/x86_64-apple-darwin/release"
+# WRAPPER_PATH="../Sources/ed25519_bip32"
 
-apple_targets=("aarch64-apple-ios" "aarch64-apple-ios-sim" "x86_64-apple-ios" "aarch64-apple-darwin" "x86_64-apple-darwin")
-# apple_targets=()
 
+# Apple
+if [[ "$OS_NAME" != *"Linux"* ]]; then
+  AARCH64_APPLE_DARWIN_PATH="./target/aarch64-apple-darwin/release"
+  X86_64_APPLE_DARWIN_PATH="./target/x86_64-apple-darwin/release"
+
+  apple_targets=("aarch64-apple-ios" "aarch64-apple-ios-sim" "x86_64-apple-ios" "aarch64-apple-darwin" "x86_64-apple-darwin")
+  # apple_targets=()
+
+  # Build for apple targets
+  for target in "${apple_targets[@]}"; do
+    echo "Building for $target..."
+    rustup target add $target
+    cargo build --release --target $target
+  done
+
+  # Merge mac libraries with lipo
+  mkdir -p $OUT_PATH/macos-native/static
+  mkdir -p $OUT_PATH/macos-native/dynamic
+
+  lipo -create $AARCH64_APPLE_DARWIN_PATH/lib$NAME.dylib \
+                $X86_64_APPLE_DARWIN_PATH/lib$NAME.dylib \
+        -output $OUT_PATH/macos-native/dynamic/lib$NAME.dylib
+
+
+  lipo -create $AARCH64_APPLE_DARWIN_PATH/lib$NAME.a \
+                $X86_64_APPLE_DARWIN_PATH/lib$NAME.a \
+        -output $OUT_PATH/macos-native/static/lib$NAME.a
+  fi
+
+# Android
 android_targets=("aarch64-linux-android" "armv7-linux-androideabi" "i686-linux-android" "x86_64-linux-android" "x86_64-unknown-linux-gnu")
 android_jni=("arm64-v8a" "armeabi-v7a" "x86" "x86_64")
 
-# Build for apple targets
-for target in "${apple_targets[@]}"; do
-  echo "Building for $target..."
-  rustup target add $target
-  cargo build --release --target $target
-done
 
-# Merge mac libraries with lipo
-mkdir -p $OUT_PATH/macos-native/static
-mkdir -p $OUT_PATH/macos-native/dynamic
+# Cross build
+# cargo install cross --git https://github.com/cross-rs/cross
 
-
-lipo -create $AARCH64_APPLE_DARWIN_PATH/lib$NAME.dylib \
-              $X86_64_APPLE_DARWIN_PATH/lib$NAME.dylib \
-      -output $OUT_PATH/macos-native/dynamic/lib$NAME.dylib
+# # Build for android targets
+# for target in "${android_targets[@]}"; do
+#   echo "Building for $target..."
+#   cross build --release --target $target
+# done
 
 
-lipo -create $AARCH64_APPLE_DARWIN_PATH/lib$NAME.a \
-              $X86_64_APPLE_DARWIN_PATH/lib$NAME.a \
-      -output $OUT_PATH/macos-native/static/lib$NAME.a
+# Cargo NDK build
+# Environment Variables
+export ANDROID_SDK=$(echo $ANDROID_HOME)
+export NDK=$(echo $ANDROID_NDK_HOME)
+# You need to check which one to use.
+export TOOLCHAIN="$NDK/toolchains/llvm/prebuilt/NDKOSVariant"
+export AR="$TOOLCHAIN/bin/llvm-ar"
+export CC="$TOOLCHAIN/bin/aarch64-linux-android$minAndroidVersion-clang"
+export CXX="$TOOLCHAIN/bin/aarch64-linux-android$minAndroidVersion-clang++"
+export LD="$TOOLCHAIN/bin/ld"
+export RANLIB="$TOOLCHAIN/bin/llvm-ranlib"
+export STRIP="$TOOLCHAIN/bin/llvm-strip"
 
-cargo install cross --git https://github.com/cross-rs/cross
+# Build command
+cargo install cargo-ndk
 
 # Build for android targets
 for target in "${android_targets[@]}"; do
-  echo "Building for $target..."
-  cross build --release --target $target
+  echo "Adding $target [rustup target add $target]..."
+  rustup target add $target
+  echo "Building for $target [cargo ndk build --release --target $target]..."
+  cargo ndk build --release --target $target
 done
 
 # Create JNI Libs folder
