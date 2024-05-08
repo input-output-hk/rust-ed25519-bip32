@@ -1,20 +1,25 @@
 #!/bin/bash
 
-# set -eo pipefail
+set -eo pipefail
 
 cd `dirname $0`
 trap "cd -" EXIT
 
-OS_NAME=$(uname)
+OS_NAME=$(uname -s)
 NAME="ed25519_bip32_wrapper"
 # BUNDLE_IDENTIFIER="org.hyperledger.$NAME"
 LIBRARY_NAME="lib$NAME.a"
 OUT_PATH="build"
 # WRAPPER_PATH="../Sources/ed25519_bip32"
 
+if [[ "$OS_NAME" == "Linux" ]]; then
+  NDKOSVariant="linux-x86_64"
+fi
+
 
 # Apple
-if [[ "$OS_NAME" != *"Linux"* ]]; then
+if [[ "$OS_NAME" == "Darwin" ]]; then
+  NDKOSVariant="darwin-x86_64"
   AARCH64_APPLE_DARWIN_PATH="./target/aarch64-apple-darwin/release"
   X86_64_APPLE_DARWIN_PATH="./target/x86_64-apple-darwin/release"
 
@@ -60,14 +65,19 @@ android_jni=("arm64-v8a" "armeabi-v7a" "x86" "x86_64")
 # Environment Variables
 export ANDROID_SDK=$(echo $ANDROID_HOME)
 export NDK=$(echo $ANDROID_NDK_HOME)
-# You need to check which one to use.
-export TOOLCHAIN="$NDK/toolchains/llvm/prebuilt/NDKOSVariant"
+export TOOLCHAIN="$NDK/toolchains/llvm/prebuilt/$NDKOSVariant"
 export AR="$TOOLCHAIN/bin/llvm-ar"
-export CC="$TOOLCHAIN/bin/aarch64-linux-android$minAndroidVersion-clang"
-export CXX="$TOOLCHAIN/bin/aarch64-linux-android$minAndroidVersion-clang++"
 export LD="$TOOLCHAIN/bin/ld"
 export RANLIB="$TOOLCHAIN/bin/llvm-ranlib"
 export STRIP="$TOOLCHAIN/bin/llvm-strip"
+export PATH="$PATH:$TOOLCHAIN:$AR:$LD:$RANLIB:$STRIP:$TOOLCHAIN/bin/"
+
+
+echo "env: "
+echo "ANDROID_SDK: $ANDROID_SDK"
+echo "NDK: $NDK"
+echo "TOOLCHAIN: $TOOLCHAIN"
+echo
 
 # Build command
 cargo install cargo-ndk
@@ -76,8 +86,16 @@ rustup target add ${android_targets[@]}
 
 # Build for android targets
 for target in "${android_targets[@]}"; do
-  echo "Building for $target [cargo ndk build --release --target $target]..."
-  cargo ndk build --release --target $target
+  export CC="$TOOLCHAIN/bin/${target}21-clang"
+  export CXX="$TOOLCHAIN/bin/${target}21-clang++"
+  export PATH="$PATH:$CC:$CXX"
+
+  if [[ -d "./target/$target/release" ]]; then
+    echo "Skipping $target: already built"
+  else
+    echo "Building $target: [cargo ndk build --release --target $target]..."
+    cargo ndk build --release --target $target
+  fi
 done
 
 # Create JNI Libs folder
