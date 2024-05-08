@@ -108,9 +108,13 @@ done
 
 # Linux target
 # Cross build "x86_64-unknown-linux-gnu"
-cargo install cross --git https://github.com/cross-rs/cross
-echo "Building for x86_64-unknown-linux-gnu..."
-cross build --release --target x86_64-unknown-linux-gnu
+if [[ -d "./target/x86_64-unknown-linux-gnu/release" ]]; then
+  echo "Skipping x86_64-unknown-linux-gnu: already built"
+else
+  echo "Building x86_64-unknown-linux-gnu: [cross build --release --target x86_64-unknown-linux-gnu]..."
+  cargo install cross --git https://github.com/cross-rs/cross
+  cross build --release --target x86_64-unknown-linux-gnu
+fi
 
 
 # Generate wrapper
