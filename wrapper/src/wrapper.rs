@@ -1,201 +1,36 @@
-use std::sync::Arc;
-use ed25519_bip32::{
-    DerivationError, DerivationScheme, XPrv, XPub, CHAIN_CODE_SIZE, EXTENDED_SECRET_KEY_SIZE, XPRV_SIZE, XPUB_SIZE
-};
+use std::{collections::HashMap, convert::TryInto};
+use ed25519_bip32::{DerivationScheme, XPrv, CHAIN_CODE_SIZE, EXTENDED_SECRET_KEY_SIZE};
 
-/// This struct represents an XPubWrapper object.
-///
-/// # Fields
-///
-/// * `key` - A byte array of size `XPUB_SIZE` that holds the key data.
-#[derive(Clone, Copy)]
-pub struct XPubWrapper {
-    pub key: [u8; XPUB_SIZE],
+fn xprv_to_hashmap(xprv: XPrv) -> HashMap<String, Vec<u8>> {
+  let sk_encoded = xprv.extended_secret_key().to_vec();
+  let cc_encoded = xprv.chain_code().to_vec();
+  
+  return HashMap::from([
+    ("secret_key".to_string(), sk_encoded),
+    ("chain_code".to_string(), cc_encoded),
+  ]);
 }
 
+pub fn from_nonextended_noforce(
+  sk: Vec<u8>,
+  chain_code: Vec<u8>,
+) -> HashMap<String, Vec<u8>> {
+  let sk_bytes: [u8; 32] = sk.as_slice().try_into().unwrap();
+  let cc_bytes: [u8; CHAIN_CODE_SIZE] = chain_code.as_slice().try_into().unwrap();
+  let xprv = XPrv::from_nonextended_noforce(&sk_bytes, &cc_bytes).unwrap();
 
-impl From<XPubWrapper> for XPub {
-    /// Converts an `XPubWrapper` instance into an `XPub` instance
-    ///
-    /// # Arguments
-    ///
-    /// * `wrapper: XPubWrapper` - An instance of `XPubWrapper` that will be converted to `XPub`.
-    ///
-    /// # Returns
-    ///
-    /// * `Self` - This function will return a `XPub` instance.
-    fn from(wrapper: XPubWrapper) -> Self {
-        XPub::from_bytes(wrapper.key)
-    }
+  return xprv_to_hashmap(xprv);
 }
 
-impl From<XPub> for XPubWrapper {
-
-    /// Converts an `XPub` value into an `XPubWrapper`, applying length checks.
-    ///
-    /// # Arguments
-    ///
-    /// * `value: XPub` - An instance of `XPub` that will be converted to `XPubWrapper`.
-    ///
-    /// # Returns
-    ///
-    /// * `Self` - This function will return an instance of `XPubWrapper` if the length of value is exactly equal to `XPUB_SIZE`.
-    ///
-    /// # Panics
-    ///
-    /// * This function will panic if `value` has a different length than `XPUB_SIZE`, with the error,
-    ///   "Length must be XPUB_SIZE" where XPUB_SIZE is the expected size.
-    ///
-    /// # Note
-    ///
-    /// * The type `XPub` and `XPubWrapper` are not explicitly defined in your code provided. Please replace them with actual data types in your usage.
-    fn from(value: XPub) -> Self {
-        let clone = value.as_ref();
-        if clone.len() == XPUB_SIZE {
-            let key: [u8; XPUB_SIZE] = value.into();
-            return XPubWrapper::new(key)
-        } else {
-            panic!("Length must be {}", XPUB_SIZE)
-        }
-    }
-}
-impl XPubWrapper {
-    /// Creates a new `XPubWrapper` by providing an array of bytes.
-    ///
-    /// # Arguments
-    ///
-    /// * `bytes` - An array of bytes representing the key.
-    pub fn new(bytes: [u8; XPUB_SIZE]) -> Self {
-        XPubWrapper {
-            key: bytes
-        }
-    }
-
-    /// Derives the object into a new instance based on the provided derivation scheme and index.
-    ///
-    /// # Arguments
-    ///
-    /// * `scheme` - The derivation scheme to use.
-    /// * `index` - The derivation index to use.
-    ///
-    /// # Returns
-    ///
-    /// * `Result<Self, DerivationError>` - The derived object on success, or an error on failure.
-    pub fn derive(&self, index: u32) -> Result<Arc<Self>, DerivationError> {
-        let x_pub: XPub = (*self).into();
-        let result = x_pub.derive(DerivationScheme::V2, index);
-        return if result.is_ok() {
-            Ok(Arc::new(result.unwrap().into()))
-        } else {
-            Err(result.err().unwrap())
-        }
-    }
-}
-
-/// This struct represents an XPrvWrapper object.
-///
-/// # Fields
-///
-/// * `key` - A byte array of size XPRV_SIZE that holds the key data.
-#[derive(Clone, Copy)]
-pub struct XPrvWrapper {
-    pub key: [u8; XPRV_SIZE],
-}
-
-impl From<XPrvWrapper> for XPrv {
-    /// Converts an `XPrvWrapper` instance into an `XPrv` instance.
-    ///
-    /// # Arguments
-    ///
-    /// * `wrapper: XPrvWrapper` - An instance of `XPrvWrapper` that will be converted to an `XPrv`.
-    ///
-    /// # Returns
-    ///
-    /// * `Self` - This function returns an instance of `XPrv`.
-    fn from(wrapper: XPrvWrapper) -> Self {
-        XPrv::from_bytes_verified(wrapper.key).unwrap()
-    }
-}
-
-impl From<XPrv> for XPrvWrapper {
-    /// Converts an `XPrv` value into an `XPrvWrapper` by performing a length check.
-    ///
-    /// # Arguments
-    ///
-    /// * `value: XPrv` - An instance of `XPrv` which will be converted into `XPrvWrapper`.
-    ///
-    /// # Returns
-    ///
-    /// * `Self` - Returns an instance of `XPrvWrapper` if the length of the given value is exactly equal to `XPRV_SIZE`.
-    ///
-    /// # Panics
-    ///
-    /// * The function will panic if the length of `value` is not equal to `XPRV_SIZE`, with the message "Length must be XPRV_SIZE", where `XPRV_SIZE` is the expected size.
-    fn from(value: XPrv) -> Self {
-        let clone = value.as_ref();
-        if clone.len() == XPRV_SIZE {
-            let key: [u8; XPRV_SIZE] = value.into();
-            return XPrvWrapper {
-                key
-            }
-        } else {
-            panic!("Length must be {}", XPRV_SIZE)
-        }
-    }
-}
-
-impl XPrvWrapper {
-    /// Get the associated `XPubWrapper`
-    pub fn public(&self) -> Arc<XPubWrapper> {
-        let x_prv: XPrv = (*self).into();
-        return Arc::new(x_prv.public().into());
-    }
-
-    /// Derives a new private key from an existing one according to the specified derivation scheme and index.
-    ///
-    /// # Arguments
-    ///
-    /// * `scheme: DerivationScheme` - The derivation scheme to be used for generating the new private key.
-    ///
-    /// * `index: DerivationIndex` - The index to be used in the derivation of the new private key.
-    ///
-    /// # Returns
-    ///
-    /// * `Result<Self, DerivationError>` - Returns a new instance of the private key if the derivation is successful.
-    /// If the derivation fails, it returns a `DerivationError`.
-    pub fn derive(&self, index: u32) -> Result<Arc<Self>, DerivationError> {
-      let x_prv: XPrv = (*self).into();
-      let derived = x_prv.derive(DerivationScheme::V2, index);
-      return Ok(Arc::new(derived.into()));
-    }
-
-    pub fn extended_secret_key(&self) -> Vec<u8> {
-      let x_prv: XPrv = (*self).into();
-      return x_prv.extended_secret_key().clone().to_vec();
-    }
-
-    pub fn chain_code(&self) -> Vec<u8> {
-      let x_prv: XPrv = (*self).into();
-      return x_prv.chain_code().clone().to_vec();
-    }
-
-    pub fn from_nonextended_noforce(
-      byte_array: Vec<u8>,
-      chain_code: Vec<u8>,
-    ) -> Self {
-        let byte_array_ref = unsafe { &*(byte_array.as_slice() as *const [u8] as *const [u8; 32]) };
-        let chain_code_ref = unsafe { &*(chain_code.as_slice() as *const [u8] as *const [u8; CHAIN_CODE_SIZE]) };
-        let x_prv = XPrv::from_nonextended_noforce(byte_array_ref, chain_code_ref).unwrap();
-        return x_prv.into()
-    }
-
-    pub fn from_extended_and_chaincode(
-      byte_array: Vec<u8>,
-      chain_code: Vec<u8>,
-    ) -> Self {
-      let byte_array_ref = unsafe { &*(byte_array.as_slice() as *const [u8] as *const [u8; EXTENDED_SECRET_KEY_SIZE]) };
-      let chain_code_ref = unsafe { &*(chain_code.as_slice() as *const [u8] as *const [u8; CHAIN_CODE_SIZE]) };
-      let x_prv = XPrv::from_extended_and_chaincode(byte_array_ref, chain_code_ref);
-      return x_prv.into()
-    }
+pub fn derive_bytes(
+  sk: Vec<u8>,
+  chain_code: Vec<u8>,
+  index: u32
+) -> HashMap<String, Vec<u8>> {
+  let sk_bytes: [u8; EXTENDED_SECRET_KEY_SIZE] = sk.as_slice().try_into().unwrap();
+  let cc_bytes: [u8; CHAIN_CODE_SIZE] = chain_code.as_slice().try_into().unwrap();
+  let xprv = XPrv::from_extended_and_chaincode(&sk_bytes, &cc_bytes);
+  let derived = xprv.derive(DerivationScheme::V2, index);
+  
+  return xprv_to_hashmap(derived);
 }

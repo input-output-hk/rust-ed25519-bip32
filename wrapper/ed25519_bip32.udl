@@ -1,31 +1,5 @@
-[Error]
-enum DerivationError {
-    "InvalidAddition",
-    "ExpectedSoftDerivation"
+namespace ed25519_bip32_wrapper {
+  record<string, bytes> from_nonextended_noforce(bytes sk, bytes chain_code);
+
+  record<string, bytes> derive_bytes(bytes sk, bytes chain_code, u32 index);
 };
-
-enum DerivationScheme {
-    "V2"
-};
-
-interface XPubWrapper {
-    [Throws=DerivationError]
-    XPubWrapper derive(u32 index);
-};
-
-interface XPrvWrapper {
-    XPubWrapper public();
-    [Throws=DerivationError]
-    XPrvWrapper derive(u32 index);
-
-    [Name=from_nonextended_noforce]
-    constructor(bytes byte_array, bytes chain_code);
-
-    [Name=from_extended_and_chaincode]
-    constructor(bytes byte_array, bytes chain_code);
-
-    bytes chain_code();
-    bytes extended_secret_key();
-};
-
-namespace ed25519_bip32_wrapper {};
