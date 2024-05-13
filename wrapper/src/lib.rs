@@ -1,4 +1,3 @@
-
 mod wrapper;
 
 pub use ed25519_bip32::{DerivationError, DerivationIndex, DerivationScheme};

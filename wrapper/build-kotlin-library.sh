@@ -7,13 +7,21 @@ trap "cd -" EXIT
 
 OS_NAME=$(uname -s)
 NAME="ed25519_bip32_wrapper"
-# BUNDLE_IDENTIFIER="org.hyperledger.$NAME"
 LIBRARY_NAME="lib$NAME.a"
 OUT_PATH="build"
-# WRAPPER_PATH="../Sources/ed25519_bip32"
 
+# Linux target
 if [[ "$OS_NAME" == "Linux" ]]; then
   NDKOSVariant="linux-x86_64"
+
+  # Cross build "x86_64-unknown-linux-gnu"
+  if [[ -d "./target/x86_64-unknown-linux-gnu/release" ]]; then
+    echo "Skipping x86_64-unknown-linux-gnu: already built"
+  else
+    echo "Building x86_64-unknown-linux-gnu: [cross build --release --target x86_64-unknown-linux-gnu]..."
+    cargo install cross --git https://github.com/cross-rs/cross
+    cross build --release --target x86_64-unknown-linux-gnu
+  fi
 fi
 
 # Apple
@@ -72,12 +80,6 @@ export STRIP="$TOOLCHAIN/bin/llvm-strip"
 export PATH="$PATH:$TOOLCHAIN:$AR:$LD:$RANLIB:$STRIP:$TOOLCHAIN/bin/"
 
 
-echo "env: "
-echo "ANDROID_SDK: $ANDROID_SDK"
-echo "NDK: $NDK"
-echo "TOOLCHAIN: $TOOLCHAIN"
-echo
-
 # Build command
 cargo install cargo-ndk
 
@@ -103,21 +105,6 @@ for key in "${!android_targets[@]}"; do
   cp ./target/${android_targets[$key]}/release/lib$NAME.so $OUT_PATH/jniLibs/${android_jni[$key]}/lib$NAME.so || echo ""
   echo "${android_targets[$key]}: ${android_jni[$key]}"
 done
-
-
-# Linux target
-
-if [[ "$OS_NAME" == "Linux" ]]; then
-  # Cross build "x86_64-unknown-linux-gnu"
-  if [[ -d "./target/x86_64-unknown-linux-gnu/release" ]]; then
-    echo "Skipping x86_64-unknown-linux-gnu: already built"
-  else
-    echo "Building x86_64-unknown-linux-gnu: [cross build --release --target x86_64-unknown-linux-gnu]..."
-    cargo install cross --git https://github.com/cross-rs/cross
-    cross build --release --target x86_64-unknown-linux-gnu
-  fi
-fi
-
 
 # Generate wrapper
 echo "Generating wrapper..."
