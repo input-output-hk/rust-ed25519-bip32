@@ -1,4 +1,4 @@
-use ed25519_bip32::{ 
+use ed25519_bip32::{
   DerivationScheme,
   XPrv,
   CHAIN_CODE_SIZE,
@@ -7,16 +7,19 @@ use ed25519_bip32::{
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::js_sys::Uint8Array;
 
+#[cfg(test)]
+mod tests;
+
 fn bytes_to_buffer(bytes: &[u8], length: usize) -> Uint8Array {
   let buffer = Uint8Array::new_with_length(length as u32);
   buffer.copy_from(bytes);
-  return buffer
+  return buffer;
 }
 
 fn xprv_to_vec(xprv: XPrv) -> Vec<Uint8Array> {
   let sk_encoded = bytes_to_buffer(&xprv.extended_secret_key(), EXTENDED_SECRET_KEY_SIZE);
   let cc_encoded = bytes_to_buffer(xprv.chain_code(), CHAIN_CODE_SIZE);
-  
+
   return vec![sk_encoded, cc_encoded];
 }
 
@@ -53,6 +56,6 @@ pub fn derive_bytes(
 
   let xprv = XPrv::from_extended_and_chaincode(&sk_bytes, &cc_bytes);
   let derived = xprv.derive(DerivationScheme::V2, index);
-  
+
   return xprv_to_vec(derived);
 }
