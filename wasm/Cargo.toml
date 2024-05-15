@@ -1,7 +1,7 @@
 [package]
 name = "ed25519-bip32-wasm"
 version = "0.4.1"
-authors = ["Vincent Hanquez <vincent.hanquez@iohk.io>", "Nicolas Di Prima <nicolas.diprima@iohk.io>", "Ahmed Moussa <ahmed.moussa@iohk.io>"]
+authors = ["Vincent Hanquez <vincent.hanquez@iohk.io>", "Nicolas Di Prima <nicolas.diprima@iohk.io>", "Ahmed Moussa <ahmed.moussa@iohk.io>", "Curtis Harding <curtis.harding@iohk.io>"]
 license = "MIT OR Apache-2.0"
 edition = "2018"
 keywords = [ "ed25519-bip32", "bip32", "ed25519" ]
