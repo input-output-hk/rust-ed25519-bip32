@@ -14,8 +14,8 @@ fn test_derive_bytes() {
   let xprv_sk = derived.extended_secret_key();
   let xprv_cc = derived.chain_code();
 
-  let mut sk_bytes = [0u8; EXTENDED_SECRET_KEY_SIZE];
-  let mut cc_bytes = [0u8; CHAIN_CODE_SIZE];
+  let mut sk_bytes = [0u8; 64];
+  let mut cc_bytes = [0u8; 32];
   result[0].copy_to(&mut sk_bytes);
   result[1].copy_to(&mut cc_bytes);
 

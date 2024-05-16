@@ -1,9 +1,4 @@
-use ed25519_bip32::{
-  DerivationScheme,
-  XPrv,
-  CHAIN_CODE_SIZE,
-  EXTENDED_SECRET_KEY_SIZE
-};
+use ed25519_bip32::{DerivationScheme, XPrv};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::js_sys::Uint8Array;
 
@@ -17,8 +12,8 @@ fn bytes_to_buffer(bytes: &[u8], length: usize) -> Uint8Array {
 }
 
 fn xprv_to_vec(xprv: XPrv) -> Vec<Uint8Array> {
-  let sk_encoded = bytes_to_buffer(&xprv.extended_secret_key(), EXTENDED_SECRET_KEY_SIZE);
-  let cc_encoded = bytes_to_buffer(xprv.chain_code(), CHAIN_CODE_SIZE);
+  let sk_encoded = bytes_to_buffer(&xprv.extended_secret_key(), 64);
+  let cc_encoded = bytes_to_buffer(xprv.chain_code(), 32);
 
   return vec![sk_encoded, cc_encoded];
 }
@@ -32,7 +27,7 @@ pub fn from_nonextended_noforce(
   chain_code: Uint8Array,
 ) -> Vec<Uint8Array> {
   let mut sk_bytes = [0u8; 32];
-  let mut cc_bytes = [0u8; CHAIN_CODE_SIZE];
+  let mut cc_bytes = [0u8; 32];
   key.copy_to(&mut sk_bytes);
   chain_code.copy_to(&mut cc_bytes);
 
@@ -49,8 +44,8 @@ pub fn derive_bytes(
   chain_code: Uint8Array,
   index: u32
 ) -> Vec<Uint8Array> {
-  let mut sk_bytes = [0u8; EXTENDED_SECRET_KEY_SIZE];
-  let mut cc_bytes = [0u8; CHAIN_CODE_SIZE];
+  let mut sk_bytes = [0u8; 64];
+  let mut cc_bytes = [0u8; 32];
   sk.copy_to(&mut sk_bytes);
   chain_code.copy_to(&mut cc_bytes);
 
