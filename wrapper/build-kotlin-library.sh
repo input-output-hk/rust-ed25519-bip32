@@ -16,6 +16,11 @@ elif [[ "$OS_NAME" == "Darwin" ]]; then
   NDKOSVariant="darwin-x86_64"
 fi
 
+if [[ "$OS_NAME" == "Darwin" ]]; then
+  echo "Opening Docker"
+  open --background /Applications/Docker.app
+fi
+
 # Linux target
 
 # Cross build "x86_64-unknown-linux-gnu"
