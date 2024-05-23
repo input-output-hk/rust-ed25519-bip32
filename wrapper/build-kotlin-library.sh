@@ -10,23 +10,33 @@ NAME="ed25519_bip32_wrapper"
 LIBRARY_NAME="lib$NAME.a"
 OUT_PATH="build"
 
-# Linux target
 if [[ "$OS_NAME" == "Linux" ]]; then
   NDKOSVariant="linux-x86_64"
+elif [[ "$OS_NAME" == "Darwin" ]]; then
+  NDKOSVariant="darwin-x86_64"
+fi
 
-  # Cross build "x86_64-unknown-linux-gnu"
-  if [[ -d "./target/x86_64-unknown-linux-gnu/release" ]]; then
-    echo "Skipping x86_64-unknown-linux-gnu: already built"
-  else
-    echo "Building x86_64-unknown-linux-gnu: [cross build --release --target x86_64-unknown-linux-gnu]..."
-    cargo install cross --git https://github.com/cross-rs/cross
-    cross build --release --target x86_64-unknown-linux-gnu
-  fi
+# Linux target
+
+# Cross build "x86_64-unknown-linux-gnu"
+if [[ -d "./target/x86_64-unknown-linux-gnu/release" ]]; then
+  echo "Skipping x86_64-unknown-linux-gnu: already built"
+else
+  echo "Building x86_64-unknown-linux-gnu: [cross build --release --target x86_64-unknown-linux-gnu]..."
+  cargo install cross --git https://github.com/cross-rs/cross
+  cross build --release --target x86_64-unknown-linux-gnu
+fi
+# Cargo build "aarch64-unknown-linux-gnu"
+if [[ -d "./target/aarch64-unknown-linux-gnu/release" ]]; then
+  echo "Skipping aarch64-unknown-linux-gnu: already built"
+else
+  echo "Building aarch64-unknown-linux-gnu: [cross build --release --target aarch64-unknown-linux-gnu]..."
+  cargo install cross --git https://github.com/cross-rs/cross
+  cross build --release --target aarch64-unknown-linux-gnu
 fi
 
 # Apple
 if [[ "$OS_NAME" == "Darwin" ]]; then
-  NDKOSVariant="darwin-x86_64"
   AARCH64_APPLE_DARWIN_PATH="./target/aarch64-apple-darwin/release"
   X86_64_APPLE_DARWIN_PATH="./target/x86_64-apple-darwin/release"
 
