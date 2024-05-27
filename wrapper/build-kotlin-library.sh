@@ -41,6 +41,7 @@ elif [[ "$OS_NAME" == "Darwin" ]]; then
     echo "Skipping x86_64-unknown-linux-gnu: already built"
   else
     echo "Building x86_64-unknown-linux-gnu: [cargo build --release --target x86_64-unknown-linux-gnu]..."
+    export CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER=x86_64-linux-gnu-gcc
     cargo build --release --target x86_64-unknown-linux-gnu
   fi
   # Cargo build "aarch64-unknown-linux-gnu"
@@ -48,6 +49,7 @@ elif [[ "$OS_NAME" == "Darwin" ]]; then
     echo "Skipping aarch64-unknown-linux-gnu: already built"
   else
     echo "Building aarch64-unknown-linux-gnu: [cargo build --release --target aarch64-unknown-linux-gnu]..."
+    export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc
     cargo build --release --target aarch64-unknown-linux-gnu
   fi
 fi
