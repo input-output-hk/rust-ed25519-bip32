@@ -11,13 +11,13 @@ fn xprv_to_hashmap(xprv: XPrv) -> HashMap<String, Vec<u8>> {
   ]);
 }
 
-pub fn from_nonextended_noforce(
+pub fn from_nonextended(
   sk: Vec<u8>,
   chain_code: Vec<u8>,
 ) -> HashMap<String, Vec<u8>> {
   let sk_bytes: [u8; 32] = sk.as_slice().try_into().unwrap();
   let cc_bytes: [u8; 32] = chain_code.as_slice().try_into().unwrap();
-  let xprv = XPrv::from_nonextended_noforce(&sk_bytes, &cc_bytes).unwrap();
+  let xprv = XPrv::from_nonextended_force(&sk_bytes, &cc_bytes);
 
   return xprv_to_hashmap(xprv);
 }

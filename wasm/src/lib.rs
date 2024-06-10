@@ -22,7 +22,7 @@ fn xprv_to_vec(xprv: XPrv) -> Vec<Uint8Array> {
  * coerce given nonextended key and chain_code to valid ed25519 values or panic
  */
 #[wasm_bindgen]
-pub fn from_nonextended_noforce(
+pub fn from_nonextended(
   key: Uint8Array,
   chain_code: Uint8Array,
 ) -> Vec<Uint8Array> {
@@ -31,7 +31,7 @@ pub fn from_nonextended_noforce(
   key.copy_to(&mut sk_bytes);
   chain_code.copy_to(&mut cc_bytes);
 
-  let xprv = XPrv::from_nonextended_noforce(&sk_bytes, &cc_bytes).unwrap();
+  let xprv = XPrv::from_nonextended_force(&sk_bytes, &cc_bytes);
   return xprv_to_vec(xprv);
 }
 
