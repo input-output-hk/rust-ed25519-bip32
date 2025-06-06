@@ -1,5 +1,5 @@
 [package]
-name = "ed25519-bip32-wrapper"
+name = "uniffi-ed25519-bip32-wrapper"
 version = "0.4.1"
 authors = ["Vincent Hanquez <vincent.hanquez@iohk.io>", "Nicolas Di Prima <nicolas.diprima@iohk.io>", "Ahmed Moussa <ahmed.moussa@iohk.io>", "Curtis Harding <curtis.harding@iohk.io>"]
 license = "MIT OR Apache-2.0"
@@ -12,10 +12,10 @@ categories = [ "cryptography" ]
 
 [dependencies]
 ed25519-bip32 = { path = "../" }
-uniffi = { version = "0.26.1", features = [ "build", "cli" ]}
+uniffi = { version = "0.28.3", features = [ "build", "cli" ]}
 
 [build-dependencies]
-uniffi = { version = "0.26.1", features = [ "build", "cli" ] }
+uniffi = { version = "0.28.3", features = [ "build", "cli" ] }
 
 [[bin]]
 name = "uniffi-bindgen"

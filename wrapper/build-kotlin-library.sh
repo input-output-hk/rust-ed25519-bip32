@@ -7,7 +7,7 @@ trap "cd -" EXIT
 
 OS_NAME=$(uname -s)
 NAME="ed25519_bip32_wrapper"
-LIBRARY_NAME="lib$NAME.a"
+LIBRARY_NAME="libuniffi_$NAME.a"
 OUT_PATH="build"
 
 
@@ -93,19 +93,20 @@ if [[ "$OS_NAME" == "Darwin" ]]; then
   mkdir -p $OUT_PATH/macos-native/static
   mkdir -p $OUT_PATH/macos-native/dynamic
 
-  lipo -create $AARCH64_APPLE_DARWIN_PATH/lib$NAME.dylib \
-                $X86_64_APPLE_DARWIN_PATH/lib$NAME.dylib \
-        -output $OUT_PATH/macos-native/dynamic/lib$NAME.dylib
+  lipo -create $AARCH64_APPLE_DARWIN_PATH/libuniffi_$NAME.dylib \
+                $X86_64_APPLE_DARWIN_PATH/libuniffi_$NAME.dylib \
+        -output $OUT_PATH/macos-native/dynamic/libuniffi_$NAME.dylib
 
 
-  lipo -create $AARCH64_APPLE_DARWIN_PATH/lib$NAME.a \
-                $X86_64_APPLE_DARWIN_PATH/lib$NAME.a \
-        -output $OUT_PATH/macos-native/static/lib$NAME.a
+  lipo -create $AARCH64_APPLE_DARWIN_PATH/libuniffi_$NAME.a \
+                $X86_64_APPLE_DARWIN_PATH/libuniffi_$NAME.a \
+        -output $OUT_PATH/macos-native/static/libuniffi_$NAME.a
 fi
 
 # Android
 android_targets=("aarch64-linux-android" "armv7-linux-androideabi" "i686-linux-android" "x86_64-linux-android")
 android_jni=("arm64-v8a" "armeabi-v7a" "x86" "x86_64")
+API_LEVEL=21
 
 # Cross build
 # cargo install cross --git https://github.com/cross-rs/cross
@@ -144,21 +145,21 @@ for target in "${android_targets[@]}"; do
     echo "Skipping $target: already built"
   else
     echo "Building $target: [cargo ndk build --release --target $target]..."
-    cargo ndk build --release --target $target
+    cargo ndk --platform $API_LEVEL build --release --target $target
   fi
 done
 
 # Create JNI Libs folder
 for key in "${!android_targets[@]}"; do
   mkdir -p $OUT_PATH/jniLibs/${android_jni[$key]}
-  cp ./target/${android_targets[$key]}/release/lib$NAME.so $OUT_PATH/jniLibs/${android_jni[$key]}/lib$NAME.so || echo ""
+  cp ./target/${android_targets[$key]}/release/libuniffi_$NAME.so $OUT_PATH/jniLibs/${android_jni[$key]}/libuniffi_$NAME.so || echo ""
   echo "${android_targets[$key]}: ${android_jni[$key]}"
 done
 
 # Generate wrapper
 echo "Generating wrapper..."
 mkdir -p $OUT_PATH
-cargo install --bin uniffi-bindgen-kotlin-multiplatform uniffi_bindgen_kotlin_multiplatform@0.1.0
+cargo install --git https://gitlab.com/trixnity/uniffi-kotlin-multiplatform-bindings.git --rev bd39c919 --force
 CURRENT_ARCH=$(rustc --version --verbose | grep host | cut -f2 -d' ')
 
 uniffi-bindgen-kotlin-multiplatform --lib-file ./target/$CURRENT_ARCH/release/$LIBRARY_NAME --out-dir $OUT_PATH/generated ./ed25519_bip32.udl
