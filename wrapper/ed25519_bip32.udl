@@ -1,5 +1,14 @@
+[Error]
+enum DerivationError {
+    "InvalidAddition",
+    "ExpectedSoftDerivation"
+};
+
 namespace ed25519_bip32_wrapper {
   record<string, bytes> from_nonextended(bytes sk, bytes chain_code);
 
   record<string, bytes> derive_bytes(bytes sk, bytes chain_code, u32 index);
+
+  [Throws=DerivationError]
+  record<string, bytes> derive_bytes_pub(bytes pk, bytes chain_code, u32 index);
 };
